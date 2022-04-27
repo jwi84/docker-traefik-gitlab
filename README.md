@@ -1,5 +1,5 @@
 # docker-traefik-gitlab
-GitLab &amp; GitLab Registry Behind Traefik in Docker
+GitLab &amp; GitLab Registry & GitLab Runner Behind Traefik in Docker
 
 # Prerequisites
 - Ubuntu 20.04 (Recommended)
@@ -145,3 +145,59 @@ docker cp gitlab:/var/opt/gitlab/gitlab-rails/etc/gitlab-registry.key .
 openssl req  -key gitlab-registry.key -new -subj "/CN=gitlab-issuer" -x509 -days 365 -out gitlab-registry.crt
 ```
 After a minute the docker image registry should now be available, and we can use it with GitLab.
+
+# GitLab Runner
+
+Login into your root account and navigate to /admin/runners for example https://gitlab.example.com/admin/runners and copy down your registration token
+
+Create a runners directory
+
+```
+sudo mkdir runners && cd runners
+```
+
+Create docker-compose.yml
+
+```
+version: '3.3'
+services:
+  gitlab_runner:
+    container_name: gitlab_runner
+    image: 'gitlab/gitlab-runner:latest'
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config:/etc/gitlab-runner
+    networks:
+      - traefik-public
+
+networks:
+  traefik-public:
+    external: true
+```
+
+Deploy runner with
+
+```
+docker-compose up -d
+```
+
+# Runner Configuration
+
+After you finish registration, the resulting configuration is written to your chosen configuration volume (for example, /srv/gitlab-runner/config) and is loaded by the runner using that configuration volume.
+
+To register a runner using a Docker container:
+
+```
+docker exec -it gitlab_runner gitlab-runner register
+```
+
+You will be prompted with a series of questions.
+
+After registration, navigate back to your admin area to find a registered runner:
+
+# Privileged Container
+
+Remember to set privileged = true at ```config/config.toml```
+
+

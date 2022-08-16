@@ -179,6 +179,7 @@ networks:
 Deploy runner with
 
 ```
+touch ./config/config.toml
 docker-compose up -d
 ```
 
@@ -196,8 +197,39 @@ You will be prompted with a series of questions.
 
 After registration, navigate back to your admin area to find a registered runner:
 
-# Privileged Container
+# Additional Configurations
 
-Remember to set privileged = true at ```config/config.toml```
+GitLab LDAP
+```
+        # Gitlab LDAP
+        gitlab_rails['gitlab_signin_enabled'] = true
+        gitlab_rails['ldap_enabled'] = true
+        gitlab_rails['prevent_ldap_sign_in'] = false
+        gitlab_rails['ldap_servers'] = {
+        'main' => {
+          'label' => 'LDAP',
+          'host' =>  '',
+          'port' => 389,
+          'uid' => 'sAMAccountName',
+          'verify_certificates' => false,
+          'bind_dn' => '',
+          'password' => '',
+          'timeout' => 10,
+          'encryption' => 'plain',
+          'active_directory' => true,
+          'allow_username_or_email_login' => true,
+          'block_auto_created_users' => true,
+          'base' => '',
+          'lowercase_usernames' => true,
+          'user_filter' => ''
+          }
+        }
+```
 
-
+GitLab KAS
+https://gitlab.com/gitlab-org/charts/gitlab-agent
+```
+        # Gitlab Kas
+        gitlab_kas['enable'] = true
+        gitlab_kas['gitlab_address'] = 'https://gitlab.example.com'
+```
